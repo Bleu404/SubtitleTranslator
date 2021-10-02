@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,8 +14,10 @@ using Newtonsoft.Json.Linq;
 
 using System.Text.RegularExpressions;
 using System.Collections;
-namespace SubtitleTranslator
+
+namespace 字幕翻译
 {
+    
     class Program
     {
         static string appId = null, secretKey = null;
@@ -48,26 +50,13 @@ namespace SubtitleTranslator
             List<String> pathList = new List<String>();
             if (pathroot != null)
             {
-
-
                 if (Directory.Exists(pathroot))
                 {
-                    DirectoryInfo TheFolder = new DirectoryInfo(pathroot);
-                    //遍历文件夹
-                    foreach (FileInfo fi in TheFolder.GetFiles("*.srt"))
-                    {
-                        if (!fi.ToString().StartsWith("chi_eng_"))
-                            pathList.Add(fi.FullName);
-
-                    }
+                    pathList = Directory.GetFiles(@pathroot, "*.srt", SearchOption.AllDirectories).TakeWhile(s=>!s.Contains("chi_eng_")).ToList<string>();
                 }
                 else
                 {
-                    string[] pathary = Regex.Split(pathroot, ".srt");
-                    for (int i = 0; i < pathary.Length - 1; i++)
-                    {
-                        pathList.Add(pathary[i] + ".srt");
-                    }
+                    pathList.AddRange(Regex.Split(pathroot, ".srt").AsEnumerable<string>());
                 }
                 foreach (String path in pathList)
                 {
@@ -108,12 +97,8 @@ namespace SubtitleTranslator
             string from = "auto";
             // 目标语言
             string to = "zh";
-            // 改成您的APP ID
-            //appId = "20210404000761741";
             Random rd = new Random();
             string salt = rd.Next(100000).ToString();
-            // 改成您的密钥
-            //secretKey = "k9l2vssy5OrGTJ7FvNUG";
             string sign = EncryptString(appId + q + salt + secretKey);
             string url = "http://api.fanyi.baidu.com/api/trans/vip/translate";//?
             qstr += "q=" + HttpUtility.UrlEncode(q);
@@ -122,6 +107,7 @@ namespace SubtitleTranslator
             qstr += "&appid=" + appId;
             qstr += "&salt=" + salt;
             qstr += "&sign=" + sign;
+            qstr += "&action=" + 1;
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             byte[] bs = Encoding.ASCII.GetBytes(qstr);
             request.Method = "POST";
@@ -132,9 +118,6 @@ namespace SubtitleTranslator
                 reqStream.Write(bs, 0, bs.Length);
                 reqStream.Close();
             }
-            //request.ContentType = "text/html;charset=UTF-8";
-            //request.UserAgent = null;
-            //request.Timeout = 6000;
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             Stream myResponseStream = response.GetResponseStream();
             StreamReader myStreamReader = new StreamReader(myResponseStream, Encoding.GetEncoding("utf-8"));
@@ -144,10 +127,7 @@ namespace SubtitleTranslator
             JsonSerializer serializer = new JsonSerializer();
             StringReader sr = new StringReader(retString);
             resp_str list = (resp_str)serializer.Deserialize(new JsonTextReader(sr), typeof(resp_str));
-            //JavaScriptSerializer js = new JavaScriptSerializer();//实例化一个能够序列化数据的类
-            //resp_str list = js.Deserialize<resp_str>(retString); //将json数据转化为对象类型并赋值给list
             List<Trans_resultItem> result = list.trans_result;
-            // Console.WriteLine(retString);
             return result;
         }
 
@@ -250,8 +230,8 @@ namespace SubtitleTranslator
             {
                 // 向用户显示出错消息
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine("The file could not be read:");
-                Console.WriteLine(e.Message);
+                Console.WriteLine("\n翻译过程出现错误:");
+                Console.WriteLine(e.Message+"\n");
             }
         }
 
@@ -277,7 +257,6 @@ namespace SubtitleTranslator
         }
         public static void Writejson(string appId, string secretKey)
         {
-
             try
             {
                 string json = File.ReadAllText("config.json");
@@ -290,7 +269,5 @@ namespace SubtitleTranslator
             catch { }
 
         }
-
-
     }
 }
