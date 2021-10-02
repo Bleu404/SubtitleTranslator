@@ -15,7 +15,7 @@ using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 using System.Collections;
 
-namespace 字幕翻译
+namespace SubtitleTranslator
 {
     
     class Program
