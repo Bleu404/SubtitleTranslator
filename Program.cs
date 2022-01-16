@@ -52,7 +52,7 @@ namespace SubtitleTranslator
             {
                 if (Directory.Exists(pathroot))
                 {
-                    pathList = Directory.GetFiles(@pathroot, "*.srt", SearchOption.AllDirectories).where(s=>!s.Contains("chi_eng_")).ToList<string>();
+                    pathList = Directory.GetFiles(@pathroot, "*.srt", SearchOption.AllDirectories).Where(s=>!s.Contains("chi_eng_")).ToList<string>();
                 }
                 else
                 {
