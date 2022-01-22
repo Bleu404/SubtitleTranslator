@@ -56,7 +56,11 @@ namespace SubtitleTranslator
                 }
                 else
                 {
-                    pathList.AddRange(Regex.Split(pathroot, ".srt").AsEnumerable<string>());
+                    string[] pathary = Regex.Split(pathroot, ".srt");
+                    for (int i = 0; i < pathary.Length-1; i++)
+                    {
+                        pathList.Add(pathary[i]+".srt");
+                    }
                 }
                 foreach (String path in pathList)
                 {
